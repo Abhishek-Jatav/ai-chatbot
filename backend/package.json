@@ -4,9 +4,9 @@
   "description": "AI FAQ Assistant Backend - NestJS",
   "scripts": {
     "build": "nest build",
-    "start": "node dist/main",
+    "start": "node dist/main.js",
     "start:dev": "ts-node -r tsconfig-paths/register src/main.ts",
-    "start:prod": "node dist/main"
+    "start:prod": "node dist/main.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

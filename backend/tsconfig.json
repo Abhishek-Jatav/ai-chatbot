@@ -3,7 +3,6 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2021",
-
     "rootDir": "./src",
     "outDir": "./dist",
 
@@ -21,8 +20,6 @@
     "skipLibCheck": true,
 
     "strict": true,
-
-    "ignoreDeprecations": "6.0",
 
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true

@@ -3,13 +3,15 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package*.json ./
-
 RUN npm install
 
 COPY . .
 
 RUN npm run build
 
+# Debug step (optional but VERY useful on Render logs)
+RUN ls -la dist
+
 EXPOSE 3001
 
-CMD ["npm", "run", "start"]
+CMD ["node", "dist/main.js"]

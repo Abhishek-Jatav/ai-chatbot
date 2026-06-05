@@ -13,7 +13,6 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow Postman, mobile apps, server-to-server requests
       if (!origin) {
         return callback(null, true);
       }
@@ -38,7 +37,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix("api");
 
-  const port = parseInt(process.env.PORT || "3000", 10);
+  const port = Number(process.env.PORT) || 3001;
 
   await app.listen(port, "0.0.0.0");
 
@@ -47,4 +46,8 @@ async function bootstrap() {
   );
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error("❌ STARTUP ERROR:");
+  console.error(err);
+  process.exit(1);
+});

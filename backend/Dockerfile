@@ -9,7 +9,6 @@ COPY . .
 
 RUN npm run build
 
-# Debug step (optional but VERY useful on Render logs)
 RUN ls -la dist
 
 EXPOSE 3001

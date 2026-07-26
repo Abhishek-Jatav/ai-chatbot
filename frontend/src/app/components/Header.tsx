@@ -61,7 +61,7 @@ export default function Header({
           {/* Right */}
 
           <div className="flex items-center gap-3">
-            <button
+            {/* <button
               onClick={changeTheme}
               className="h-10 px-4 rounded-xl border border-white/10 hover:bg-white/5 transition flex items-center gap-2">
               {theme === "dark" ? (
@@ -75,7 +75,7 @@ export default function Header({
                   <span className="hidden md:block">Dark</span>
                 </>
               )}
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

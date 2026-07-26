@@ -100,8 +100,10 @@ export class ChatService {
         // Fall through to regex search
       }
 
-      // Regex fallback
-      const regex = new RegExp(query, "i");
+      // Regex fallback (escape special characters so arbitrary user
+      // input can never throw a SyntaxError or behave as a regex pattern)
+      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(escaped, "i");
 
       return await this.conversationModel
         .find({

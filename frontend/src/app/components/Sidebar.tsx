@@ -1,6 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Search,
+  MessageSquare,
+  Calendar,
+  ChevronRight,
+  X,
+  History,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
+
 import { api } from "@/lib/api";
 import { Conversation, SidebarProps } from "@/types";
 
@@ -12,7 +24,6 @@ export default function Sidebar({
 }: SidebarProps) {
   const [history, setHistory] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
-
   const [search, setSearch] = useState("");
 
   const [page, setPage] = useState(1);
@@ -37,6 +48,8 @@ export default function Sidebar({
 
       setPage(p);
       setTotalPages(res.totalPages);
+    } catch {
+      toast.error("Unable to load history");
     } finally {
       setLoading(false);
     }
@@ -56,100 +69,166 @@ export default function Sidebar({
     loadStats();
   }, [open, refreshKey, loadHistory, loadStats]);
 
-  const searchHistory = async (value: string) => {
-    setSearch(value);
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!search.trim()) {
+        loadHistory(1);
+        return;
+      }
 
-    if (!value.trim()) {
-      loadHistory(1);
-      return;
-    }
+      try {
+        const res: any = await api.searchHistory(search);
 
-    try {
-      const res: any = await api.searchHistory(value);
+        setHistory(res.data);
+        setPage(1);
+        setTotalPages(1);
+      } catch {
+        toast.error("Search failed");
+      }
+    }, 350);
 
-      setHistory(res.data);
-      setPage(1);
-      setTotalPages(1);
-    } catch {}
-  };
+    return () => clearTimeout(timer);
+  }, [search, loadHistory]);
 
-  const formatDate = (time: string) => {
-    const date = new Date(time);
-
-    return date.toLocaleDateString([], {
+  const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString([], {
       month: "short",
       day: "numeric",
     });
-  };
 
+  const title = useMemo(() => `${stats.total} Conversations`, [stats.total]);
   return (
-    <>
-      {open && <div className="sidebar-overlay" onClick={onClose} />}
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+          />
 
-      <aside className={`sidebar ${open ? "show" : ""}`}>
-        <div className="sidebar-header">
-          <div>
-            <h2>History</h2>
+          <motion.aside
+            initial={{ x: -420 }}
+            animate={{ x: 0 }}
+            exit={{ x: -420 }}
+            transition={{ type: "spring", damping: 24 }}
+            className="fixed left-0 top-0 z-50 h-screen w-[380px] max-w-[92vw]
+            border-r border-white/10 bg-[#020617]/95 backdrop-blur-2xl">
+            <div className="flex h-full flex-col">
+              {/* Header */}
 
-            <p>{stats.total} conversations</p>
-          </div>
+              <div className="flex items-center justify-between border-b border-white/10 p-6">
+                <div>
+                  <h2 className="flex items-center gap-2 text-xl font-bold">
+                    <History size={20} />
+                    History
+                  </h2>
 
-          <button className="icon-btn" onClick={onClose}>
-            ✕
-          </button>
-        </div>
+                  <p className="mt-1 text-sm text-slate-400">{title}</p>
+                </div>
 
-        <div className="sidebar-stats">
-          <div className="stat-card">
-            <h3>{stats.total}</h3>
+                <button
+                  onClick={onClose}
+                  className="rounded-xl border border-white/10 p-2 transition hover:bg-white/10">
+                  <X size={18} />
+                </button>
+              </div>
 
-            <span>Total</span>
-          </div>
+              {/* Stats */}
 
-          <div className="stat-card">
-            <h3>{stats.todayCount}</h3>
+              <div className="grid grid-cols-2 gap-4 p-6">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                  <div className="text-3xl font-bold">{stats.total}</div>
 
-            <span>Today</span>
-          </div>
-        </div>
+                  <div className="mt-1 text-sm text-slate-400">Total Chats</div>
+                </div>
 
-        <input
-          className="search-input"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => searchHistory(e.target.value)}
-        />
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                  <div className="text-3xl font-bold">{stats.todayCount}</div>
 
-        <div className="history-list">
-          {!loading && history.length === 0 && (
-            <div className="empty-history">No conversations</div>
-          )}
+                  <div className="mt-1 text-sm text-slate-400">Today</div>
+                </div>
+              </div>
 
-          {history.map((item) => (
-            <button
-              key={item._id}
-              className="history-card"
-              onClick={() => {
-                onSelect(item);
-                onClose();
-              }}>
-              <h4>
-                {item.question.length > 55
-                  ? item.question.slice(0, 55) + "..."
-                  : item.question}
-              </h4>
+              {/* Search */}
 
-              <span>{formatDate(item.timestamp)}</span>
-            </button>
-          ))}
+              <div className="px-6 pb-5">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <Search size={18} className="text-slate-400" />
 
-          {page < totalPages && (
-            <button className="load-more" onClick={() => loadHistory(page + 1)}>
-              {loading ? "Loading..." : "Load More"}
-            </button>
-          )}
-        </div>
-      </aside>
-    </>
+                  <input
+                    className="w-full bg-transparent text-sm placeholder:text-slate-500"
+                    placeholder="Search conversations..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* History */}
+
+              <div className="flex-1 overflow-y-auto px-4 pb-6">
+                {loading && history.length === 0 && (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="animate-spin" size={28} />
+                  </div>
+                )}
+
+                {!loading && history.length === 0 && (
+                  <div className="flex h-64 flex-col items-center justify-center text-center">
+                    <MessageSquare size={42} className="mb-4 text-slate-500" />
+
+                    <h3 className="font-semibold">No Conversations</h3>
+
+                    <p className="mt-2 text-sm text-slate-500">
+                      Your previous chats will appear here.
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  {history.map((item) => (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      key={item._id}
+                      onClick={() => {
+                        onSelect(item);
+                        toast.success("Conversation loaded");
+                        onClose();
+                      }}
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-left transition hover:border-cyan-500/30 hover:bg-cyan-500/5">
+                      <div className="line-clamp-2 font-medium">
+                        {item.question}
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
+                        <div className="flex items-center gap-1">
+                          <Calendar size={14} />
+
+                          {formatDate(item.timestamp)}
+                        </div>
+
+                        <ChevronRight size={15} />
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+
+                {page < totalPages && (
+                  <button
+                    onClick={() => loadHistory(page + 1)}
+                    className="primary-btn mt-6 w-full">
+                    Load More
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

@@ -1,15 +1,31 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: 'AI FAQ Assistant',
-  description: 'Ask anything, get intelligent answers powered by Gemini AI',
+  title: "AI FAQ Assistant",
+  description: "Premium AI Assistant powered by Google Gemini",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        {children}
+
+        <Toaster
+          richColors
+          position="top-right"
+          closeButton
+          expand
+          duration={2500}
+          theme="dark"
+        />
+      </body>
     </html>
   );
 }

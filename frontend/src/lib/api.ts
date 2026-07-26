@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api`;
 
 async function request<T>(
   endpoint: string,
@@ -29,7 +29,7 @@ async function request<T>(
 
 export const api = {
   ask(question: string) {
-    return request("/chat", {
+    return request("/chat/ask", {
       method: "POST",
       body: JSON.stringify({ question }),
     });
@@ -42,7 +42,7 @@ export const api = {
     onError: (message: string) => void,
   ) {
     try {
-      const response = await fetch(`${BASE_URL}/chat/stream`, {
+      const response = await fetch(`${BASE_URL}/chat/ask/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,20 +99,20 @@ export const api = {
   },
 
   deleteConversation(id: string) {
-    return request(`/history/${id}`, {
+    return request(`/chat/${id}`, {
       method: "DELETE",
     });
   },
 
   getHistory(page = 1, limit = 15) {
-    return request(`/history?page=${page}&limit=${limit}`);
+    return request(`/chat/history?page=${page}&limit=${limit}`);
   },
 
   searchHistory(query: string) {
-    return request(`/history/search?q=${encodeURIComponent(query)}`);
+    return request(`/chat/search?q=${encodeURIComponent(query)}`);
   },
 
   getStats() {
-    return request("/history/stats");
+    return request("/chat/stats");
   },
 };

@@ -1,134 +1,165 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  Sparkles,
+  BrainCircuit,
+  MessageSquareText,
+  History,
+  Database,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
 import ManualBackendCheck from "../hooks/manualBackendCheck/ManualBackendCheck";
 
-export default function Page() {
-  return (
-    <div className="relative min-h-screen bg-[#020617] overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-[#020617]" />
-      <div className="absolute top-[-150px] left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-cyan-600/10 blur-[150px] rounded-full" />
-      <div className="absolute bottom-[-100px] right-[-100px] w-[500px] h-[500px] bg-purple-600/10 blur-[150px] rounded-full" />
+const features = [
+  {
+    icon: BrainCircuit,
+    title: "Gemini AI",
+    desc: "Fast and intelligent answers powered by Google's latest Gemini models.",
+  },
+  {
+    icon: MessageSquareText,
+    title: "Streaming Chat",
+    desc: "Watch AI responses appear in real-time for a natural conversation.",
+  },
+  {
+    icon: History,
+    title: "Conversation History",
+    desc: "Search and revisit previous conversations instantly.",
+  },
+  {
+    icon: Database,
+    title: "Persistent Storage",
+    desc: "MongoDB Atlas securely stores every conversation.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Production Ready",
+    desc: "NestJS architecture with clean code and scalable APIs.",
+  },
+  {
+    icon: Zap,
+    title: "Lightning Fast",
+    desc: "Optimized frontend built with Next.js App Router.",
+  },
+];
 
-      {/* Backend Status */}
-      <div className="fixed top-4 left-4 z-50 w-[340px]">
-        <div className="bg-[#0f172a]/90 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-white/10">
-          <ManualBackendCheck />
-        </div>
+export default function Home() {
+  return (
+    <main className="relative overflow-hidden min-h-screen">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[900px] bg-cyan-500/10 blur-[180px] rounded-full" />
+
+        <div className="absolute bottom-0 right-0 w-[700px] h-[700px] bg-purple-600/10 blur-[180px] rounded-full" />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 py-12">
-        <div className="max-w-6xl w-full">
-          {/* Hero */}
-          <div className="text-center mb-14">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              🤖 AI FAQ Assistant
+      <div className="max-w-7xl mx-auto px-6">
+        <nav className="flex items-center justify-between py-8">
+          <div className="flex items-center gap-3">
+            <Sparkles className="text-cyan-400" />
+
+            <h2 className="font-bold text-2xl">AI FAQ Assistant</h2>
+          </div>
+
+          <Link href="/home" className="primary-btn">
+            Launch App
+          </Link>
+        </nav>
+
+        <section className="grid lg:grid-cols-2 gap-14 items-center py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}>
+            <span className="inline-flex px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm mb-6">
+              ✨ Premium AI Assistant
+            </span>
+
+            <h1 className="text-5xl lg:text-7xl font-black leading-tight">
+              Chat with
+              <br />
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+                Gemini AI
+              </span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-cyan-400 font-medium mb-5">
-              Intelligent AI Chatbot Powered by Google Gemini
+            <p className="mt-8 text-slate-400 text-lg leading-8 max-w-xl">
+              Experience a beautiful AI assistant with streaming responses,
+              searchable history, markdown support, production-ready backend,
+              and premium UI.
             </p>
 
-            <p className="max-w-3xl mx-auto text-gray-400 text-lg leading-relaxed">
-              Ask anything and receive fast, intelligent answers powered by
-              Google Gemini AI. Built with Next.js, NestJS, MongoDB Atlas, and
-              real-time streaming for a smooth conversational experience.
-            </p>
-
-            <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap gap-4 mt-10">
               <Link
-                href="/chat"
-                className="px-8 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 transition font-semibold text-white">
-                Launch Assistant
+                href="/home"
+                className="primary-btn flex items-center gap-2">
+                Start Chat
+                <ArrowRight size={18} />
               </Link>
 
-              <a
-                href="https://github.com/your-github"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition text-white">
-                GitHub
-              </a>
-
-              <a
-                href="https://your-portfolio.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition text-white">
-                Portfolio
+              <a href="#features" className="secondary-btn">
+                Learn More
               </a>
             </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7 }}>
+            <div className="glass rounded-3xl p-6">
+              <ManualBackendCheck />
+            </div>
+          </motion.div>
+        </section>
+
+        <section id="features" className="py-10">
+          <h2 className="text-4xl font-bold text-center mb-14">
+            Powerful Features
+          </h2>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
+            {features.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <motion.div
+                  whileHover={{ y: -8 }}
+                  key={item.title}
+                  className="card p-7">
+                  <div className="w-14 h-14 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-5">
+                    <Icon className="text-cyan-400" />
+                  </div>
+
+                  <h3 className="font-bold text-xl mb-3">{item.title}</h3>
+
+                  <p className="text-slate-400 leading-7">{item.desc}</p>
+                </motion.div>
+              );
+            })}
           </div>
+        </section>
 
-          {/* Features */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
-              <h3 className="text-white font-semibold text-lg mb-3">
-                🤖 AI Assistant
-              </h3>
+        <section className="py-20">
+          <div className="glass rounded-3xl p-10 text-center">
+            <h2 className="text-4xl font-bold mb-4">Ready to experience AI?</h2>
 
-              <ul className="space-y-2 text-gray-400">
-                <li>Google Gemini AI</li>
-                <li>Streaming Responses</li>
-                <li>Markdown Support</li>
-                <li>Natural Conversations</li>
-              </ul>
-            </div>
+            <p className="text-slate-400 mb-10">
+              Start chatting with Gemini AI in seconds.
+            </p>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
-              <h3 className="text-white font-semibold text-lg mb-3">
-                📚 Chat Management
-              </h3>
-
-              <ul className="space-y-2 text-gray-400">
-                <li>Conversation History</li>
-                <li>Search Previous Chats</li>
-                <li>Delete Conversations</li>
-                <li>Dark / Light Theme</li>
-              </ul>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
-              <h3 className="text-white font-semibold text-lg mb-3">
-                ⚡ Modern Stack
-              </h3>
-
-              <ul className="space-y-2 text-gray-400">
-                <li>Next.js 15</li>
-                <li>NestJS</li>
-                <li>MongoDB Atlas</li>
-                <li>Docker Ready</li>
-              </ul>
-            </div>
+            <Link
+              href="/home"
+              className="primary-btn inline-flex items-center gap-2">
+              Launch Assistant
+              <ArrowRight size={18} />
+            </Link>
           </div>
-
-          {/* Architecture */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-10 backdrop-blur-md">
-            <h2 className="text-white text-xl font-semibold mb-4">
-              🏗 System Flow
-            </h2>
-
-            <div className="text-center text-gray-300 leading-loose">
-              Next.js
-              <span className="mx-2 text-cyan-400">→</span>
-              REST API / SSE
-              <span className="mx-2 text-cyan-400">→</span>
-              NestJS
-              <span className="mx-2 text-cyan-400">→</span>
-              Google Gemini AI
-              <span className="mx-2 text-cyan-400">→</span>
-              MongoDB Atlas
-              <span className="mx-2 text-cyan-400">→</span>
-              Streaming Chat UI
-            </div>
-          </div>
-
-          {/* Footer */}
-          <p className="text-center text-sm text-gray-500">
-            The backend is hosted on a free server and may take a few moments to
-            wake up before the AI assistant is ready.
-          </p>
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

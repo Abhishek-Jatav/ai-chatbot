@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL as string;
+const BACKEND_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api`;
 
 // ⏱️ helper: fetch with timeout
 const fetchWithTimeout = async (url: string, timeout = 5000) => {

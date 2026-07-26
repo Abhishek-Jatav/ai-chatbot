@@ -1,94 +1,118 @@
-import { Conversation, PaginatedResponse, StatsResponse } from '@/types';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL
-  ? `${process.env.NEXT_PUBLIC_API_URL}/api`
-  : '/api';
+async function request<T>(
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const res = await fetch(`${BASE_URL}${endpoint}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+    ...options,
+  });
 
-async function handleResponse<T>(res: Response): Promise<T> {
+  let data: any = null;
+
+  try {
+    data = await res.json();
+  } catch {}
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `Request failed: ${res.status}`);
+    throw new Error(
+      data?.message || data?.error || `Request failed (${res.status})`,
+    );
   }
-  return res.json();
+
+  return data;
 }
 
 export const api = {
-  async askQuestion(question: string): Promise<{ success: boolean; data: Conversation }> {
-    const res = await fetch(`${API_BASE}/chat/ask`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+  ask(question: string) {
+    return request("/chat", {
+      method: "POST",
       body: JSON.stringify({ question }),
     });
-    return handleResponse(res);
   },
 
-  async askQuestionStream(
+  async askStream(
     question: string,
-    onChunk: (text: string) => void,
-    onDone: (id?: string) => void,
-    onError: (err: string) => void,
-  ): Promise<void> {
-    const res = await fetch(`${API_BASE}/chat/ask/stream`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question }),
-    });
+    onChunk: (chunk: string) => void,
+    onComplete: (id: string) => void,
+    onError: (message: string) => void,
+  ) {
+    try {
+      const response = await fetch(`${BASE_URL}/chat/stream`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question }),
+      });
 
-    if (!res.ok || !res.body) {
-      onError('Failed to connect to streaming endpoint');
-      return;
-    }
+      if (!response.ok || !response.body) {
+        throw new Error("Unable to connect.");
+      }
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+      let savedId = "";
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
+      while (true) {
+        const { done, value } = await reader.read();
 
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+
+        const lines = chunk.split("\n").filter(Boolean);
+
+        for (const line of lines) {
+          if (!line.startsWith("data:")) continue;
+
+          const payload = line.replace("data:", "").trim();
+
           try {
-            const data = JSON.parse(line.slice(6));
-            if (data.error) {
-              onError(data.error);
+            const parsed = JSON.parse(payload);
+
+            if (parsed.chunk) {
+              onChunk(parsed.chunk);
+            }
+
+            if (parsed.id) {
+              savedId = parsed.id;
+            }
+
+            if (parsed.error) {
+              onError(parsed.error);
               return;
             }
-            if (data.done) {
-              onDone(data.id);
-              return;
-            }
-            if (data.chunk) {
-              onChunk(data.chunk);
-            }
-          } catch (_) {}
+          } catch {}
         }
       }
+
+      onComplete(savedId);
+    } catch (err: any) {
+      onError(err.message || "Streaming failed.");
     }
   },
 
-  async getHistory(page = 1, limit = 20): Promise<PaginatedResponse<Conversation>> {
-    const res = await fetch(`${API_BASE}/chat/history?page=${page}&limit=${limit}`);
-    return handleResponse(res);
+  deleteConversation(id: string) {
+    return request(`/history/${id}`, {
+      method: "DELETE",
+    });
   },
 
-  async searchConversations(query: string): Promise<{ success: boolean; data: Conversation[]; total: number }> {
-    const res = await fetch(`${API_BASE}/chat/search?q=${encodeURIComponent(query)}`);
-    return handleResponse(res);
+  getHistory(page = 1, limit = 15) {
+    return request(`/history?page=${page}&limit=${limit}`);
   },
 
-  async getStats(): Promise<{ success: boolean; data: StatsResponse }> {
-    const res = await fetch(`${API_BASE}/chat/stats`);
-    return handleResponse(res);
+  searchHistory(query: string) {
+    return request(`/history/search?q=${encodeURIComponent(query)}`);
   },
 
-  async deleteConversation(id: string): Promise<{ success: boolean; message: string }> {
-    const res = await fetch(`${API_BASE}/chat/${id}`, { method: 'DELETE' });
-    return handleResponse(res);
+  getStats() {
+    return request("/history/stats");
   },
 };
